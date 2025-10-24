@@ -96,18 +96,24 @@ export default function Home() {
                 variant="outline"
                 className="w-full sm:w-auto min-w-[200px] h-14 text-lg gap-3 hover-elevate active-elevate-2"
                 data-testid="button-download-android"
+                asChild
               >
-                <SiAndroid className="w-6 h-6" />
-                <span>أندرويد</span>
+                <a href="https://play.google.com/store/apps/details?id=com.shamcash.app" target="_blank" rel="noopener noreferrer">
+                  <SiAndroid className="w-6 h-6" />
+                  <span>أندرويد</span>
+                </a>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto min-w-[200px] h-14 text-lg gap-3 hover-elevate active-elevate-2"
                 data-testid="button-download-ios"
+                asChild
               >
-                <SiApple className="w-6 h-6" />
-                <span>IOS</span>
+                <a href="https://apps.apple.com/app/shamcash/id123456789" target="_blank" rel="noopener noreferrer">
+                  <SiApple className="w-6 h-6" />
+                  <span>IOS</span>
+                </a>
               </Button>
             </div>
           </div>
