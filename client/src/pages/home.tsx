@@ -1,7 +1,8 @@
-import { Menu, User, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown } from "lucide-react";
+import { Menu, User, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown, LogIn } from "lucide-react";
 import { SiAndroid, SiApple } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import {
   Accordion,
   AccordionContent,
@@ -14,6 +15,7 @@ import logoImage from "@assets/IMG_0350_1761335875653.jpeg";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     trackPageView("/", "شام كاش - متوفر الآن");
@@ -25,14 +27,15 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* User Icon */}
+            {/* Login Button */}
             <Button
-              size="icon"
               variant="ghost"
               className="hover-elevate active-elevate-2"
-              data-testid="button-user-menu"
+              onClick={() => setLocation("/login")}
+              data-testid="button-login"
             >
-              <User className="w-5 h-5" />
+              <LogIn className="w-4 h-4 ml-2" />
+              تسجيل دخول
             </Button>
 
             {/* Logo - Center */}
