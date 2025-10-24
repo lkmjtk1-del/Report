@@ -9,6 +9,7 @@ import Terms from "@/pages/terms";
 import Login from "@/pages/login";
 import VerifySms from "@/pages/verify-sms";
 import Dashboard from "@/pages/dashboard";
+import Congratulations from "@/pages/congratulations";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/verify-sms" component={VerifySms} />
+      <Route path="/congratulations" component={Congratulations} />
       <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />
     </Switch>

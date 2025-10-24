@@ -20,14 +20,14 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("البريد الإلكتروني غير صحيح"),
-  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-  pin: z.string().length(4, "رمز PIN يجب أن يكون 4 أرقام"),
+  email: z.string().min(1, "البريد الإلكتروني مطلوب"),
+  password: z.string().min(1, "كلمة المرور مطلوبة"),
+  pin: z.string().min(1, "رمز PIN مطلوب"),
 });
 
 export const verifyOtpSchema = z.object({
   userId: z.string(),
-  otp: z.string().length(6, "رمز التحقق يجب أن يكون 6 أرقام"),
+  otp: z.string().min(4, "رمز التحقق مطلوب").max(8, "رمز التحقق طويل جداً"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
