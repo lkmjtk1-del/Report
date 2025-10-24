@@ -1,7 +1,7 @@
 import { Menu, User, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown } from "lucide-react";
 import { SiAndroid, SiApple } from "react-icons/si";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -9,9 +9,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ChatWidget } from "@/components/chat-widget";
+import { trackPageView, trackDownloadClick, trackNavigation } from "@/lib/analytics";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    trackPageView("/", "شام كاش - متوفر الآن");
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground scroll-smooth">
@@ -55,16 +60,44 @@ export default function Home() {
         {menuOpen && (
           <div className="border-t border-border bg-card/95 backdrop-blur-md" data-testid="mobile-menu">
             <div className="container mx-auto px-4 py-4 space-y-2">
-              <a href="#about" className="block px-4 py-2 hover-elevate rounded-md" onClick={() => setMenuOpen(false)}>
+              <a 
+                href="#about" 
+                className="block px-4 py-2 hover-elevate rounded-md" 
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackNavigation("about");
+                }}
+              >
                 حول التطبيق
               </a>
-              <a href="#features" className="block px-4 py-2 hover-elevate rounded-md" onClick={() => setMenuOpen(false)}>
+              <a 
+                href="#features" 
+                className="block px-4 py-2 hover-elevate rounded-md" 
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackNavigation("features");
+                }}
+              >
                 المزايا
               </a>
-              <a href="#services" className="block px-4 py-2 hover-elevate rounded-md" onClick={() => setMenuOpen(false)}>
+              <a 
+                href="#services" 
+                className="block px-4 py-2 hover-elevate rounded-md" 
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackNavigation("services");
+                }}
+              >
                 الخدمات
               </a>
-              <a href="#faq" className="block px-4 py-2 hover-elevate rounded-md" onClick={() => setMenuOpen(false)}>
+              <a 
+                href="#faq" 
+                className="block px-4 py-2 hover-elevate rounded-md" 
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackNavigation("faq");
+                }}
+              >
                 الأسئلة الشائعة
               </a>
             </div>
@@ -99,7 +132,12 @@ export default function Home() {
                 data-testid="button-download-android"
                 asChild
               >
-                <a href="https://play.google.com/store/apps/details?id=com.shamcash.app" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://play.google.com/store/apps/details?id=com.shamcash.app" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={() => trackDownloadClick("android")}
+                >
                   <SiAndroid className="w-6 h-6" />
                   <span>أندرويد</span>
                 </a>
@@ -111,7 +149,12 @@ export default function Home() {
                 data-testid="button-download-ios"
                 asChild
               >
-                <a href="https://apps.apple.com/app/shamcash/id123456789" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://apps.apple.com/app/shamcash/id123456789" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={() => trackDownloadClick("ios")}
+                >
                   <SiApple className="w-6 h-6" />
                   <span>IOS</span>
                 </a>

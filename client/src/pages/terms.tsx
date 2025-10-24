@@ -1,8 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useEffect } from "react";
+import { trackPageView } from "@/lib/analytics";
 
 export default function Terms() {
+  useEffect(() => {
+    trackPageView("/terms", "الشروط والأحكام - شام كاش");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
