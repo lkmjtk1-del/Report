@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { ChatWidget } from "@/components/chat-widget";
 import { trackPageView, trackDownloadClick, trackNavigation } from "@/lib/analytics";
+import logoImage from "@assets/IMG_0362_1761335585264.jpeg";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,13 +35,13 @@ export default function Home() {
               <User className="w-5 h-5" />
             </Button>
 
-            {/* Logo Placeholder - Center */}
+            {/* Logo - Center */}
             <div className="absolute left-1/2 -translate-x-1/2" data-testid="logo-shamcash">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">SC</span>
-                </div>
-              </div>
+              <img 
+                src={logoImage} 
+                alt="شام كاش" 
+                className="w-10 h-10 object-contain"
+              />
             </div>
 
             {/* Menu Icon */}
