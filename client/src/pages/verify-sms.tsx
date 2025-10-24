@@ -30,7 +30,7 @@ export default function VerifySms() {
 
   useEffect(() => {
     if (!userId) {
-      setLocation("/login");
+      setLocation("/");
       return;
     }
 
@@ -213,7 +213,7 @@ export default function VerifySms() {
           <div className="text-center">
             <Button
               variant="ghost"
-              onClick={() => setLocation("/login")}
+              onClick={() => setLocation("/")}
               data-testid="button-back-login"
             >
               العودة لتسجيل الدخول
