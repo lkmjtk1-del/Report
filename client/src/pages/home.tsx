@@ -323,17 +323,23 @@ export default function Home() {
             <div className="space-y-4 text-center">
               <h4 className="font-bold text-lg">روابط سريعة</h4>
               <nav className="flex flex-col space-y-2">
-                <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-about">
                   حول التطبيق
                 </a>
-                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">
                   المزايا
                 </a>
-                <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-services">
                   الخدمات
                 </a>
-                <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-faq">
                   الأسئلة الشائعة
+                </a>
+                <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-privacy">
+                  سياسة الخصوصية
+                </a>
+                <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-terms">
+                  الشروط والأحكام
                 </a>
               </nav>
             </div>
@@ -351,7 +357,7 @@ export default function Home() {
           {/* Copyright */}
           <div className="pt-8 border-t border-border text-center">
             <p className="text-muted-foreground text-sm">
-              © 2024 شام كاش. جميع الحقوق محفوظة.
+              © 2025 شام كاش. جميع الحقوق محفوظة.
             </p>
           </div>
         </div>
