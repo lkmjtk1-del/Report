@@ -1,4 +1,4 @@
-import { Menu, User, MessageCircle, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown } from "lucide-react";
+import { Menu, User, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown } from "lucide-react";
 import { SiAndroid, SiApple } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ChatWidget } from "@/components/chat-widget";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -363,14 +364,8 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Floating Chat Button */}
-      <Button
-        size="icon"
-        className="fixed bottom-6 left-6 w-16 h-16 rounded-full shadow-xl hover-elevate active-elevate-2 pulse-glow z-50"
-        data-testid="button-floating-chat"
-      >
-        <MessageCircle className="w-7 h-7" />
-      </Button>
+      {/* Chat Widget */}
+      <ChatWidget />
     </div>
   );
 }
