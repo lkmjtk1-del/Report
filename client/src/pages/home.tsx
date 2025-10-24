@@ -62,7 +62,8 @@ export default function Home() {
             <div className="container mx-auto px-4 py-4 space-y-2">
               <a 
                 href="#about" 
-                className="block px-4 py-2 hover-elevate rounded-md" 
+                className="block px-4 py-2 hover-elevate rounded-md"
+                data-testid="link-menu-about"
                 onClick={() => {
                   setMenuOpen(false);
                   trackNavigation("about");
@@ -72,7 +73,8 @@ export default function Home() {
               </a>
               <a 
                 href="#features" 
-                className="block px-4 py-2 hover-elevate rounded-md" 
+                className="block px-4 py-2 hover-elevate rounded-md"
+                data-testid="link-menu-features"
                 onClick={() => {
                   setMenuOpen(false);
                   trackNavigation("features");
@@ -82,7 +84,8 @@ export default function Home() {
               </a>
               <a 
                 href="#services" 
-                className="block px-4 py-2 hover-elevate rounded-md" 
+                className="block px-4 py-2 hover-elevate rounded-md"
+                data-testid="link-menu-services"
                 onClick={() => {
                   setMenuOpen(false);
                   trackNavigation("services");
@@ -92,7 +95,8 @@ export default function Home() {
               </a>
               <a 
                 href="#faq" 
-                className="block px-4 py-2 hover-elevate rounded-md" 
+                className="block px-4 py-2 hover-elevate rounded-md"
+                data-testid="link-menu-faq"
                 onClick={() => {
                   setMenuOpen(false);
                   trackNavigation("faq");
