@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { ChatWidget } from "@/components/chat-widget";
 import { trackPageView, trackDownloadClick, trackNavigation } from "@/lib/analytics";
-import logoImage from "@assets/IMG_0362_1761335585264.jpeg";
+import logoImage from "@assets/IMG_0350_1761335875653.jpeg";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
