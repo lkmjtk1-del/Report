@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { trackChatOpen, trackChatMessage } from "@/lib/analytics";
 
 interface Message {
   id: string;
@@ -35,6 +36,7 @@ export function ChatWidget() {
 
     setMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
+    trackChatMessage();
 
     setTimeout(() => {
       const autoReply: Message = {
@@ -141,7 +143,10 @@ export function ChatWidget() {
       <Button
         size="icon"
         className="fixed bottom-6 left-6 w-16 h-16 rounded-full shadow-xl hover-elevate active-elevate-2 pulse-glow z-50"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) trackChatOpen();
+        }}
         data-testid="button-floating-chat"
       >
         {isOpen ? <X className="w-7 h-7" /> : <MessageCircle className="w-7 h-7" />}
