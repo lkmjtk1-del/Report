@@ -18,6 +18,17 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.otps = new Map();
+    
+    const testUser: User = {
+      id: "test-user-id",
+      email: "test@shamcash.com",
+      password: "123456",
+      pin: "1234",
+      phone: "+966500000000",
+      isVerified: false,
+      createdAt: new Date(),
+    };
+    this.users.set(testUser.id, testUser);
   }
 
   async getUser(id: string): Promise<User | undefined> {
