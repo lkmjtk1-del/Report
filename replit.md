@@ -2,9 +2,17 @@
 
 ## Overview
 
-ShaamCash is a modern fintech application built with a full-stack TypeScript architecture. The platform is designed as a mobile-first financial service application with Arabic language support (RTL layout). The application draws inspiration from contemporary fintech platforms like Revolut, N26, and Cash App, emphasizing trust, security, and ease of use through a minimalistic dark theme interface.
+ShaamCash is a modern fintech landing page built with a full-stack TypeScript architecture. The platform is designed as a mobile-first financial service application with Arabic language support (RTL layout). The application draws inspiration from contemporary fintech platforms like Revolut, N26, and Cash App, emphasizing trust, security, and ease of use through a minimalistic dark theme interface.
 
-The project uses a monorepo structure with shared code between client and server, featuring a React-based frontend with shadcn/ui components and an Express backend with PostgreSQL database integration.
+The project features a comprehensive Arabic landing page with multiple sections, live chat support, legal pages, and Google Analytics integration. Built with React, shadcn/ui components, and Express backend architecture ready for future expansion.
+
+## Recent Changes (October 2025)
+
+### Phase 2 Features Completed:
+1. **App Store Integration** - Connected download buttons to actual Google Play and App Store links
+2. **Legal Pages** - Created comprehensive Privacy Policy and Terms & Conditions pages in Arabic with full RTL support
+3. **Live Chat System** - Implemented interactive chat widget with auto-replies and proper responsive design
+4. **Analytics Integration** - Added Google Analytics (GA4) with custom event tracking for downloads, chat interactions, and navigation
 
 ## User Preferences
 
@@ -112,15 +120,24 @@ Preferred communication style: Simple, everyday language.
 **Directory Structure**
 - `/client` - React frontend application
   - `/src/components/ui` - shadcn/ui components
-  - `/src/pages` - Route components
+  - `/src/components` - Custom components (e.g., chat-widget.tsx)
+  - `/src/pages` - Route components (home.tsx, privacy.tsx, terms.tsx)
   - `/src/hooks` - Custom React hooks
-  - `/src/lib` - Utility functions and shared logic
+  - `/src/lib` - Utility functions and shared logic (analytics.ts, queryClient.ts)
+  - `index.html` - HTML entry point with Google Analytics integration
 - `/server` - Express backend
   - `routes.ts` - API route registration
   - `storage.ts` - Data access layer
   - `vite.ts` - Development server setup
 - `/shared` - Code shared between client and server
   - `schema.ts` - Database schemas and validation
+
+**Key Features & Components**
+- **Landing Page** (/) - Comprehensive Arabic homepage with Hero, About, Features, Services, FAQ sections
+- **Legal Pages** (/privacy, /terms) - Full Arabic content with RTL support
+- **Chat Widget** - Interactive support chat with auto-replies, responsive design
+- **Analytics** - Google Analytics GA4 tracking for page views, downloads, navigation, and chat events
+- **Download Links** - Functional links to Google Play and App Store
 
 **Import Aliases**
 - `@/*` - Maps to `client/src/*`
