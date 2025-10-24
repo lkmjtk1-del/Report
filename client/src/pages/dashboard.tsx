@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
 
   const handleLogout = () => {
-    setLocation("/login");
+    setLocation("/");
   };
 
   return (

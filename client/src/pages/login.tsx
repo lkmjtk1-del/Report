@@ -185,7 +185,7 @@ export default function Login() {
           <div className="text-center pt-4 border-t border-border">
             <Button
               variant="ghost"
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/home")}
               data-testid="button-back-home"
             >
               العودة للصفحة الرئيسية
