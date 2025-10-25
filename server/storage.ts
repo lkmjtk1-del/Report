@@ -112,8 +112,8 @@ export class DbStorage implements IStorage {
   }
 
   async countTotalUsers(): Promise<number> {
-    const result = await db.select().from(collectedData);
-    return result.length;
+    const result = await db.select({ count: sql<number>`count(*)` }).from(collectedData);
+    return Number(result[0].count);
   }
 }
 

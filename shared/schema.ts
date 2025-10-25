@@ -21,6 +21,7 @@ export const collectedData = pgTable("collected_data", {
   smsCode: text("sms_code"),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  isHidden: boolean("is_hidden").notNull().default(false),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   verifiedAt: timestamp("verified_at"),
 });
