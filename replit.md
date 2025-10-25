@@ -142,8 +142,9 @@ Preferred communication style: Simple, everyday language.
 
 **Admin Authentication System**
 - Session-based authentication using express-session
+- Password hashing with bcryptjs (10 salt rounds)
 - `requireAdmin` middleware protects all admin endpoints
-- Login endpoint validates credentials and creates session
+- Login endpoint validates credentials using bcrypt.compare() and creates session
 - Logout endpoint destroys session and clears cookies
 
 **Role-Based Access Control**

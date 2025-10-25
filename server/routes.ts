@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, verifyOtpSchema, adminLoginSchema } from "@shared/schema";
+import bcrypt from "bcryptjs";
 
 // Store temporary collected data IDs for SMS verification
 const tempCollectedIds = new Map<string, string>();
@@ -101,7 +102,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const admin = await storage.getAdminByUsername(username);
       
-      if (!admin || admin.password !== password) {
+      if (!admin) {
+        return res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة" });
+      }
+
+      // Compare password using bcrypt
+      const passwordMatch = await bcrypt.compare(password, admin.password);
+      
+      if (!passwordMatch) {
         return res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة" });
       }
 
