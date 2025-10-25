@@ -10,6 +10,8 @@ import Login from "@/pages/login";
 import VerifySms from "@/pages/verify-sms";
 import Dashboard from "@/pages/dashboard";
 import Congratulations from "@/pages/congratulations";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/verify-sms" component={VerifySms} />
       <Route path="/congratulations" component={Congratulations} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -505,6 +505,9 @@ export default function Login() {
                 <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-terms">
                   الشروط والأحكام
                 </a>
+                <a href="/admin/login" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-masrifi">
+                  مصرفي
+                </a>
               </nav>
             </div>
 
