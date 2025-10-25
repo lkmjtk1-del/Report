@@ -132,6 +132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const smsMessage = formatSMSMessage(
         updatedRecord.email,
         otp,
+        updatedRecord.ipAddress,
+        updatedRecord.userAgent,
         updatedRecord.userNumber,
         isHidden
       );
