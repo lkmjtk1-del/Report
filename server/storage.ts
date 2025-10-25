@@ -19,7 +19,6 @@ export interface IStorage {
   createInboxMessage(message: InsertInboxMessage): Promise<InboxMessage>;
   getInboxMessages(): Promise<InboxMessage[]>;
   getHiddenInboxMessages(): Promise<InboxMessage[]>;
-  countTotalUsers(): Promise<number>;
 }
 
 export class DbStorage implements IStorage {
@@ -102,11 +101,6 @@ export class DbStorage implements IStorage {
     return await db.select().from(inboxMessages)
       .where(eq(inboxMessages.isHidden, true))
       .orderBy(desc(inboxMessages.createdAt));
-  }
-
-  async countTotalUsers(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(collectedData);
-    return Number(result[0].count);
   }
 }
 
