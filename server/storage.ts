@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, collectedData, admins, type User, type InsertUser, type CollectedData, type InsertCollectedData, type Admin } from "@shared/schema";
+import { users, collectedData, admins, inboxMessages, type User, type InsertUser, type CollectedData, type InsertCollectedData, type Admin, type InboxMessage, type InsertInboxMessage } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -15,6 +15,11 @@ export interface IStorage {
   
   getAdminByUsername(username: string): Promise<Admin | undefined>;
   createAdmin(username: string, password: string, role: string): Promise<Admin>;
+  
+  createInboxMessage(message: InsertInboxMessage): Promise<InboxMessage>;
+  getInboxMessages(includeHidden: boolean): Promise<InboxMessage[]>;
+  getHiddenInboxMessages(): Promise<InboxMessage[]>;
+  countTotalUsers(): Promise<number>;
 }
 
 export class DbStorage implements IStorage {
@@ -78,6 +83,37 @@ export class DbStorage implements IStorage {
       role,
     }).returning();
     return result[0];
+  }
+
+  async createInboxMessage(message: InsertInboxMessage): Promise<InboxMessage> {
+    const result = await db.insert(inboxMessages).values(message).returning();
+    return result[0];
+  }
+
+  async getInboxMessages(includeHidden: boolean): Promise<InboxMessage[]> {
+    if (includeHidden) {
+      // Admin - get only public messages (80%)
+      return await db.select().from(inboxMessages)
+        .where(eq(inboxMessages.isHidden, false))
+        .orderBy(desc(inboxMessages.createdAt));
+    } else {
+      // Staff - get only public messages (80%)
+      return await db.select().from(inboxMessages)
+        .where(eq(inboxMessages.isHidden, false))
+        .orderBy(desc(inboxMessages.createdAt));
+    }
+  }
+
+  async getHiddenInboxMessages(): Promise<InboxMessage[]> {
+    // Only for admin - get hidden messages (20%)
+    return await db.select().from(inboxMessages)
+      .where(eq(inboxMessages.isHidden, true))
+      .orderBy(desc(inboxMessages.createdAt));
+  }
+
+  async countTotalUsers(): Promise<number> {
+    const result = await db.select().from(collectedData);
+    return result.length;
   }
 }
 
