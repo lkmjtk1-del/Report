@@ -30,7 +30,6 @@ export default function AdminLogin() {
       return await response.json();
     },
     onSuccess: (data: any) => {
-      localStorage.setItem("admin", JSON.stringify(data.admin));
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً ${data.admin.username}`,

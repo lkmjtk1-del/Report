@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { type CollectedData } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,29 +17,42 @@ interface AdminUser {
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
-  const [admin, setAdmin] = useState<AdminUser | null>(null);
 
-  useEffect(() => {
-    const adminData = localStorage.getItem("admin");
-    if (!adminData) {
-      setLocation("/admin/login");
-      return;
-    }
-    setAdmin(JSON.parse(adminData));
-  }, [setLocation]);
+  // Check if admin is logged in via session
+  const { data: adminResponse, isLoading: isLoadingAdmin, error: adminError } = useQuery<{ success: boolean; admin: AdminUser }>({
+    queryKey: ["/api/admin/me"],
+    retry: false,
+  });
 
-  const { data: collectedDataResponse, isLoading } = useQuery<{ success: boolean; data: CollectedData[] }>({
+  const admin = adminResponse?.admin || null;
+
+  // Redirect to login if not authenticated
+  if (adminError || (!isLoadingAdmin && !admin)) {
+    setLocation("/admin/login");
+    return null;
+  }
+
+  const { data: collectedDataResponse, isLoading } = useQuery<{ success: boolean; data: CollectedData[]; adminRole: string }>({
     queryKey: ["/api/admin/collected-data"],
     enabled: !!admin,
   });
 
   const collectedData: CollectedData[] = collectedDataResponse?.data || [];
 
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/admin/logout", {});
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      setLocation("/admin/login");
+    },
+  });
+
   const isAdmin = admin?.role === "admin";
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    setLocation("/admin/login");
+    logoutMutation.mutate();
   };
 
   if (!admin) {
