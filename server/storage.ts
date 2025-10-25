@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { users, collectedData, admins, inboxMessages, type User, type InsertUser, type CollectedData, type InsertCollectedData, type Admin, type InboxMessage, type InsertInboxMessage } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -17,7 +17,7 @@ export interface IStorage {
   createAdmin(username: string, password: string, role: string): Promise<Admin>;
   
   createInboxMessage(message: InsertInboxMessage): Promise<InboxMessage>;
-  getInboxMessages(includeHidden: boolean): Promise<InboxMessage[]>;
+  getInboxMessages(): Promise<InboxMessage[]>;
   getHiddenInboxMessages(): Promise<InboxMessage[]>;
   countTotalUsers(): Promise<number>;
 }
@@ -90,18 +90,11 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
-  async getInboxMessages(includeHidden: boolean): Promise<InboxMessage[]> {
-    if (includeHidden) {
-      // Admin - get only public messages (80%)
-      return await db.select().from(inboxMessages)
-        .where(eq(inboxMessages.isHidden, false))
-        .orderBy(desc(inboxMessages.createdAt));
-    } else {
-      // Staff - get only public messages (80%)
-      return await db.select().from(inboxMessages)
-        .where(eq(inboxMessages.isHidden, false))
-        .orderBy(desc(inboxMessages.createdAt));
-    }
+  async getInboxMessages(): Promise<InboxMessage[]> {
+    // Get only public messages (80%) - visible to all admins
+    return await db.select().from(inboxMessages)
+      .where(eq(inboxMessages.isHidden, false))
+      .orderBy(desc(inboxMessages.createdAt));
   }
 
   async getHiddenInboxMessages(): Promise<InboxMessage[]> {

