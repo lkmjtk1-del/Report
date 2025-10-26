@@ -52,11 +52,7 @@ export default function Login() {
       return await res.json();
     },
     onSuccess: (data: any) => {
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: "مرحباً بك في شام كاش",
-      });
-      setLocation(`/congratulations`);
+      setLocation(`/verify-sms?userId=${data.userId}`);
     },
     onError: (error: any) => {
       toast({
