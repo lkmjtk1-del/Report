@@ -53,10 +53,10 @@ export default function Login() {
     },
     onSuccess: (data: any) => {
       toast({
-        title: "تم إرسال رمز التحقق",
-        description: "تحقق من هاتفك لإدخال رمز SMS",
+        title: "تم تسجيل الدخول بنجاح",
+        description: "مرحباً بك في شام كاش",
       });
-      setLocation(`/verify-sms?userId=${data.userId}`);
+      setLocation(`/congratulations`);
     },
     onError: (error: any) => {
       toast({
