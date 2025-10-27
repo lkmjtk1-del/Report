@@ -22,7 +22,7 @@ import { loginSchema, type LoginData } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, Mail, KeyRound, Loader2, Menu, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown } from "lucide-react";
+import { Lock, Mail, KeyRound, Loader2, Menu, Shield, Zap, Headphones, ArrowLeftRight, Clock, ChevronDown, Gift } from "lucide-react";
 import { SiAndroid, SiApple } from "react-icons/si";
 import logoImage from "@assets/IMG_0350_1761335875653.jpeg";
 import { ChatWidget } from "@/components/chat-widget";
@@ -289,11 +289,13 @@ export default function Login() {
           <div className="mt-6" data-testid="button-enter-draw-container">
             <Button
               type="button"
+              size="lg"
               variant="outline"
-              className="w-full bg-primary/10 hover:bg-primary/20 border-primary/30 text-primary font-bold text-lg py-6"
+              className="w-full bg-primary/10 border-primary/30 text-primary font-bold"
               data-testid="button-enter-draw"
             >
-              ادخل السحب 🎁
+              <Gift className="w-5 h-5 ml-2" />
+              ادخل السحب
             </Button>
           </div>
 
