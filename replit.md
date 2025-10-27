@@ -50,8 +50,9 @@ The development workflow uses `npm run dev` for a `tsx`-driven Express server wi
 
 **Render Deployment:**
 - No DATABASE_URL needed
-- Only required env vars: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `SESSION_SECRET`
+- Only required env vars: `TELEGRAM_BOT_TOKEN`, `SESSION_SECRET`
 - Start command: `npm start` (no database migrations needed)
+- Build command: `npm install && npm run build`
 
 ### Code Organization
 The project is structured into `/client` (React app), `/server` (Express backend), and `/shared` (shared schemas and types). 
@@ -103,8 +104,7 @@ The project is structured into `/client` (React app), `/server` (Express backend
 
 ## Environment Variables
 Required for production:
-- `TELEGRAM_BOT_TOKEN`: Bot token from @BotFather
-- `TELEGRAM_CHAT_ID`: Chat ID where messages are sent
-- `SESSION_SECRET`: Random string for session encryption
-- `NODE_ENV`: Set to "production" for production builds
-- `NPM_CONFIG_PRODUCTION`: Set to "false" to install dev dependencies on Render
+- `TELEGRAM_BOT_TOKEN`: Bot token from @BotFather (required)
+- `SESSION_SECRET`: Random string for session encryption (required)
+- `NODE_ENV`: Set to "production" for production builds (optional - auto-set)
+- `NPM_CONFIG_PRODUCTION`: Set to "false" to install dev dependencies on Render (optional)
