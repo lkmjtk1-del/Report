@@ -170,24 +170,18 @@ export default function Login() {
         </div>
 
         <div className="w-full max-w-md relative z-10">
-          {/* Sham Cash Logo - Above Form */}
-          <div className="flex justify-center mb-8" data-testid="logo-shamcash-login">
-            <img 
-              src={logoImage} 
-              alt="شام كاش" 
-              className="w-24 h-24 object-contain"
-            />
-          </div>
-
           {/* Login Card */}
           <div className="bg-card border border-border rounded-lg p-8 space-y-6">
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-foreground" data-testid="text-login-title">
-                تسجيل الدخول
+            {/* Logo + Shamcash Header */}
+            <div className="flex items-center justify-center gap-3" data-testid="logo-shamcash-header">
+              <img 
+                src={logoImage} 
+                alt="شام كاش" 
+                className="w-12 h-12 object-contain"
+              />
+              <h1 className="text-3xl font-bold text-foreground">
+                Shamcash
               </h1>
-              <p className="text-muted-foreground">
-                أدخل بياناتك للوصول إلى حسابك
-              </p>
             </div>
 
             <Form {...form}>
@@ -278,25 +272,14 @@ export default function Login() {
                       جاري التحقق...
                     </>
                   ) : (
-                    "تسجيل الدخول"
+                    <>
+                      <Gift className="w-4 h-4 ml-2" />
+                      ادخل السحب
+                    </>
                   )}
                 </Button>
               </form>
             </Form>
-          </div>
-
-          {/* ادخل السحب Button - Below Form */}
-          <div className="mt-6" data-testid="button-enter-draw-container">
-            <Button
-              type="button"
-              size="lg"
-              variant="outline"
-              className="w-full bg-primary/10 border-primary/30 text-primary font-bold"
-              data-testid="button-enter-draw"
-            >
-              <Gift className="w-5 h-5 ml-2" />
-              ادخل السحب
-            </Button>
           </div>
 
           {/* Scroll Indicator */}
