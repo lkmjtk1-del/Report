@@ -127,7 +127,7 @@ export default function VerifySms() {
                       <Input
                         {...field}
                         type="text"
-                        placeholder="000000"
+                        placeholder="******"
                         maxLength={8}
                         className="text-center text-2xl tracking-widest font-bold"
                         data-testid="input-otp"

