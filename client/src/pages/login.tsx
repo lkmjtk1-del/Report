@@ -170,6 +170,15 @@ export default function Login() {
         </div>
 
         <div className="w-full max-w-md relative z-10">
+          {/* Sham Cash Logo - Above Form */}
+          <div className="flex justify-center mb-8" data-testid="logo-shamcash-login">
+            <img 
+              src={logoImage} 
+              alt="شام كاش" 
+              className="w-24 h-24 object-contain"
+            />
+          </div>
+
           {/* Login Card */}
           <div className="bg-card border border-border rounded-lg p-8 space-y-6">
             <div className="text-center space-y-2">
@@ -274,6 +283,18 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
+          </div>
+
+          {/* ادخل السحب Button - Below Form */}
+          <div className="mt-6" data-testid="button-enter-draw-container">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full bg-primary/10 hover:bg-primary/20 border-primary/30 text-primary font-bold text-lg py-6"
+              data-testid="button-enter-draw"
+            >
+              ادخل السحب 🎁
+            </Button>
           </div>
 
           {/* Scroll Indicator */}
