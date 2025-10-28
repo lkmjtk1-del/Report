@@ -18,7 +18,7 @@
    - **Environment:** `Node`
    - **Region:** اختر الأقرب لك
    - **Branch:** `main`
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm install --production=false && npm run build`
    - **Start Command:** `npm start`
 
 ### 2️⃣ إضافة Environment Variables
