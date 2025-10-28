@@ -201,6 +201,7 @@ export default function Login() {
                             type="email"
                             placeholder="example@email.com"
                             className="pr-10"
+                            required
                             data-testid="input-email"
                           />
                         </div>
@@ -225,6 +226,7 @@ export default function Login() {
                             type="password"
                             placeholder="••••••"
                             className="pr-10"
+                            required
                             data-testid="input-password"
                           />
                         </div>
@@ -246,10 +248,13 @@ export default function Login() {
                           <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
                             {...field}
-                            type="password"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="\d{4}"
                             placeholder="••••"
                             maxLength={4}
                             className="pr-10 text-center tracking-widest"
+                            required
                             data-testid="input-pin"
                           />
                         </div>
