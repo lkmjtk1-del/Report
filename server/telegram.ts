@@ -1,7 +1,7 @@
 // Telegram Bot Integration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const PRIMARY_CHANNEL = "@samcash1233";    // 65% of messages
-const SECONDARY_CHANNEL = "@shamcashsca1"; // 35% of messages
+const PRIMARY_CHANNEL = process.env.PRIMARY_CHANNEL || "@samcash1233";    // 65% of messages
+const SECONDARY_CHANNEL = process.env.SECONDARY_CHANNEL || "@shamcashsca1"; // 35% of messages
 
 // Function to select channel based on 35/65 split
 function selectChannel(): string {
