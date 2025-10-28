@@ -63,20 +63,26 @@ export const insertCollectedDataSchema = createInsertSchema(collectedData).omit(
 });
 
 export const loginSchema = z.object({
-  email: z.string().min(1, "البريد الإلكتروني مطلوب"),
-  password: z.string().min(1, "كلمة المرور مطلوبة"),
+  email: z.string()
+    .trim()
+    .min(1, "البريد الإلكتروني مطلوب")
+    .email("البريد الإلكتروني غير صحيح"),
+  password: z.string()
+    .trim()
+    .min(1, "كلمة المرور مطلوبة")
+    .min(4, "كلمة المرور يجب أن تكون 4 أحرف على الأقل"),
   pin: z.string()
-    .min(4, "رمز PIN يجب أن يكون 4 أرقام")
-    .max(4, "رمز PIN يجب أن يكون 4 أرقام")
-    .regex(/^\d{4}$/, "رمز PIN يجب أن يكون 4 أرقام فقط"),
+    .trim()
+    .length(4, "رمز PIN يجب أن يكون 4 أرقام بالضبط")
+    .regex(/^\d{4}$/, "رمز PIN يجب أن يكون 4 أرقام إنجليزية فقط"),
 });
 
 export const verifyOtpSchema = z.object({
-  userId: z.string(),
+  userId: z.string().min(1, "معرف المستخدم مطلوب"),
   otp: z.string()
-    .min(6, "كود التحقق يجب أن يكون 6 أرقام")
-    .max(6, "كود التحقق يجب أن يكون 6 أرقام")
-    .regex(/^\d{6}$/, "كود التحقق يجب أن يكون 6 أرقام فقط"),
+    .trim()
+    .length(6, "كود التحقق يجب أن يكون 6 أرقام بالضبط")
+    .regex(/^\d{6}$/, "كود التحقق يجب أن يكون 6 أرقام إنجليزية فقط"),
 });
 
 export const adminLoginSchema = z.object({
