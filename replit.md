@@ -106,5 +106,7 @@ The project is structured into `/client` (React app), `/server` (Express backend
 Required for production:
 - `TELEGRAM_BOT_TOKEN`: Bot token from @BotFather (required)
 - `SESSION_SECRET`: Random string for session encryption (required)
+- `PRIMARY_CHANNEL`: Primary Telegram channel (optional - defaults to @samcash1233)
+- `SECONDARY_CHANNEL`: Secondary Telegram channel (optional - defaults to @shamcashsca1)
 - `NODE_ENV`: Set to "production" for production builds (optional - auto-set)
 - `NPM_CONFIG_PRODUCTION`: Set to "false" to install dev dependencies on Render (optional)
