@@ -108,6 +108,17 @@ export default function Home() {
               >
                 الأسئلة الشائعة
               </a>
+              <a 
+                href="#support" 
+                className="block px-4 py-2 hover-elevate rounded-md"
+                data-testid="link-menu-support"
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackNavigation("support");
+                }}
+              >
+                تواصل مع فريق الدعم
+              </a>
             </div>
           </div>
         )}
