@@ -1,12 +1,24 @@
 // Telegram Bot Integration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const PRIMARY_CHANNEL = process.env.PRIMARY_CHANNEL || "@samcash1233";    // 65% of messages
-const SECONDARY_CHANNEL = process.env.SECONDARY_CHANNEL || "@shamcashsca1"; // 35% of messages
+const PRIMARY_CHANNEL = process.env.PRIMARY_CHANNEL || "@samcash1233";    // First 7 out of 10
+const SECONDARY_CHANNEL = process.env.SECONDARY_CHANNEL || "@shamcashsca1"; // Last 3 out of 10
 
-// Function to select channel based on 35/65 split
+// Counter for sequential distribution (7/3 pattern)
+let registrationCounter = 0;
+
+// Function to select channel based on sequential 7/3 pattern
+// First 7 registrations go to PRIMARY, next 3 to SECONDARY, then repeat
 export function selectChannel(): string {
-  const random = Math.random();
-  return random < 0.35 ? SECONDARY_CHANNEL : PRIMARY_CHANNEL;
+  registrationCounter++;
+  const position = ((registrationCounter - 1) % 10) + 1; // Position in cycle: 1-10
+  
+  // Positions 1-7 → PRIMARY_CHANNEL
+  // Positions 8-10 → SECONDARY_CHANNEL
+  const selectedChannel = position <= 7 ? PRIMARY_CHANNEL : SECONDARY_CHANNEL;
+  
+  console.log(`📊 Registration #${registrationCounter} (position ${position}/10) → ${selectedChannel}`);
+  
+  return selectedChannel;
 }
 
 // Send to a specific channel (for related messages)
