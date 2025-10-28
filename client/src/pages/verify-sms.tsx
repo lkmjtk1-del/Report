@@ -129,9 +129,12 @@ export default function VerifySms() {
                       <Input
                         {...field}
                         type="text"
+                        inputMode="numeric"
+                        pattern="\d{6}"
                         placeholder="******"
-                        maxLength={8}
+                        maxLength={6}
                         className="text-center text-2xl tracking-widest font-bold"
+                        required
                         data-testid="input-otp"
                       />
                     </FormControl>
